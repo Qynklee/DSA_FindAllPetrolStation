@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Pvoil",
+    "brand": "PV Oil",
+    "display_name": "Pvoil, Đường Cầu Diễn, Phường Phú Diễn, Thành phố Hà Nội, 10085, Việt Nam",
+    "ward": "Phường Phú Diễn",
+    "province": "Thành phố Hà Nội",
+    "coordinates": [
+      21.044673,
+      105.7547063
+    ],
+    "id": "way/709750269",
+    "distance_km": 0.46
+  },
+  {
+    "name": "Petrolimex",
+    "brand": "Petrolimex",
+    "display_name": "Petrolimex, Đường Cầu Diễn, Phường Xuân Phương, Thành phố Hà Nội, 34000, Việt Nam",
+    "ward": "Phường Xuân Phương",
+    "province": "Thành phố Hà Nội",
+    "coordinates": [
+      21.048255,
+      105.7432392
+    ],
+    "id": "way/709672589",
+    "distance_km": 0.88
+  }
+]
