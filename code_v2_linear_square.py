@@ -2,6 +2,7 @@ import json
 import math
 from typing import List, Tuple, Optional
 from dataclasses import dataclass
+import time
 
 @dataclass
 class Point:
@@ -441,7 +442,6 @@ class RTree:
         return 1 + max(self._get_height_recursive(child) for _, child in node.entries)
 
 def main():
-    """Chương trình chính"""
     import argparse
     
     parser = argparse.ArgumentParser(description='R-Tree tìm kiếm trạm xăng (Square Search)')
@@ -492,11 +492,15 @@ def main():
     if args.lat is not None and args.lon is not None and args.radius is not None:
         print(f"\nTìm kiếm trạm xăng trong bán kính {args.radius} km")
         print(f"Tâm: ({args.lat}, {args.lon})")
-        print(f"(Sử dụng hình vuông để tìm kiếm nhanh, sau đó lọc theo bán kính)")
         
         search_point = Point(args.lat, args.lon, {})
+
+        start = time.perf_counter()
         results = rtree.search_square(search_point, args.radius)
-        
+        end = time.perf_counter()
+
+        print(f"Tìm kiếm hoàn tất trong {(end - start)*1000:.3f} ms.")
+
         print(f"\nTìm thấy {len(results)} trạm xăng:")
         print("-" * 80)
         
@@ -506,52 +510,8 @@ def main():
             print(f"   Khoảng cách: {distance:.2f} km")
             print(f"   Tọa độ: ({point.lat}, {point.lon})")
             print()
-    else:
-        # Chế độ interactive
-        print("\n" + "="*80)
-        print("R-TREE ĐÃ SẴN SÀNG - Chế độ tìm kiếm interactive")
-        print("="*80)
-        print("Thuật toán: Tìm trong hình vuông (nhanh) → Lọc theo bán kính (chính xác)")
-        
-        while True:
-            try:
-                print("\nNhập thông tin tìm kiếm (hoặc 'q' để thoát):")
-                lat_input = input("  Vĩ độ (lat): ").strip()
-                if lat_input.lower() == 'q':
-                    break
-                
-                lon_input = input("  Kinh độ (lon): ").strip()
-                if lon_input.lower() == 'q':
-                    break
-                
-                radius_input = input("  Bán kính (km): ").strip()
-                if radius_input.lower() == 'q':
-                    break
-                
-                lat = float(lat_input)
-                lon = float(lon_input)
-                radius = float(radius_input)
-                
-                search_point = Point(lat, lon, {})
-                results = rtree.search_square(search_point, radius)
-                
-                print(f"\n{'='*80}")
-                print(f"Tìm thấy {len(results)} trạm xăng trong bán kính {radius} km:")
-                print("="*80)
-                
-                for i, (point, distance) in enumerate(results, 1):
-                    print(f"\n{i}. {point.data['name']} ({point.data['brand']})")
-                    print(f"   Địa chỉ: {point.data['display_name']}")
-                    print(f"   Khoảng cách: {distance} km")
-                    print(f"   Tọa độ: ({point.lat}, {point.lon})")
-                
-            except ValueError as e:
-                print(f"Lỗi: Vui lòng nhập số hợp lệ! ({e})")
-            except KeyboardInterrupt:
-                print("\n\nĐã hủy bỏ.")
-                break
-        
-        print("\nCảm ơn bạn đã sử dụng!")
+
+
 
 if __name__ == "__main__":
     main()
