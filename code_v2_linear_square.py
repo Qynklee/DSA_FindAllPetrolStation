@@ -48,6 +48,9 @@ class MBR:
         Kiểm tra MBR có giao với hình vuông không.
         Hình vuông được định nghĩa bởi tâm và nửa cạnh (theo lat/lon).
         """
+
+        EPSILON = 1e-2
+        
         # Tính bounds của hình vuông tìm kiếm
         square_min_lat = center_lat - half_side_lat
         square_max_lat = center_lat + half_side_lat
@@ -61,13 +64,13 @@ class MBR:
         # - MBR hoàn toàn ở phía trên square
         # - MBR hoàn toàn ở phía dưới square
         
-        if self.max_lat < square_min_lat:  # MBR ở phía dưới square
+        if self.max_lat < square_min_lat - EPSILON:  # MBR ở phía dưới square
             return False
-        if self.min_lat > square_max_lat:  # MBR ở phía trên square
+        if self.min_lat > square_max_lat + EPSILON:  # MBR ở phía trên square
             return False
-        if self.max_lon < square_min_lon:  # MBR ở bên trái square
+        if self.max_lon < square_min_lon - EPSILON:  # MBR ở bên trái square
             return False
-        if self.min_lon > square_max_lon:  # MBR ở bên phải square
+        if self.min_lon > square_max_lon + EPSILON:  # MBR ở bên phải square
             return False
         
         # Nếu không rơi vào các trường hợp trên thì có giao nhau
