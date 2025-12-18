@@ -29,16 +29,18 @@ def distance_km(lat1, lon1, lat2, lon2):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='R-Tree tìm kiếm trạm xăng (Linear Search)')
-    parser.add_argument('--file', type=str, required=True, 
-                       help='Đường dẫn file JSON chứa dữ liệu trạm xăng')
+    parser = argparse.ArgumentParser(description='Linear Search for Gas Stations')
+    parser.add_argument('--file', type=str)
     
     args = parser.parse_args()
 
-    # Đọc dữ liệu
-    print(f"Đang đọc dữ liệu từ {args.file}...")
-    
-    f = open(args.file, "r", encoding="utf-8")
+    file = "db_fix.json"
+    if args.file is not None:
+        file = args.file
+
+    f = open(file, "r", encoding="utf-8")
+
+
     data = json.load(f)
 
     while True:

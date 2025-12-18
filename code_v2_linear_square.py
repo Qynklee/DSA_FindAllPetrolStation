@@ -3,6 +3,8 @@ import math
 from typing import List, Tuple, Optional
 from dataclasses import dataclass
 import time
+import argparse
+    
 
 @dataclass
 class Point:
@@ -50,7 +52,7 @@ class MBR:
         Hình vuông được định nghĩa bởi tâm và nửa cạnh (theo lat/lon).
         """
 
-        EPSILON = 1e-2
+        EPSILON = 1
         
         # Tính bounds của hình vuông tìm kiếm
         square_min_lat = center_lat - half_side_lat
@@ -441,33 +443,14 @@ class RTree:
             return 1
         return 1 + max(self._get_height_recursive(child) for _, child in node.entries)
 
-def main():
-    import argparse
+def CreateRTreeFromFile(file_path: str, max_entries: int = 5) -> RTree:
     
-    parser = argparse.ArgumentParser(description='R-Tree tìm kiếm trạm xăng (Square Search)')
-    parser.add_argument('--file', type=str, required=True, 
-                       help='Đường dẫn file JSON chứa dữ liệu trạm xăng')
-    parser.add_argument('--max-entries', type=int, default=5, 
-                       help='Số lượng tối đa MBR cho mỗi node (N)')
-    parser.add_argument('--lat', type=float, 
-                       help='Vĩ độ điểm tìm kiếm')
-    parser.add_argument('--lon', type=float, 
-                       help='Kinh độ điểm tìm kiếm')
-    parser.add_argument('--radius', type=float, 
-                       help='Bán kính tìm kiếm (km) - sẽ tìm trong hình vuông cạnh 2*radius')
-    
-    args = parser.parse_args()
-    
-    # Đọc dữ liệu
-    print(f"Đang đọc dữ liệu từ {args.file}...")
-    with open(args.file, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    print(f"Đã đọc {len(data)} trạm xăng")
+    print(f"Database: {len(data)} gas stations")
     
-    # Tạo R-Tree
-    print(f"Đang tạo R-Tree với max_entries = {args.max_entries}...")
-    rtree = RTree(max_entries=args.max_entries)
+    rtree = RTree(max_entries=max_entries)
     
     for item in data:
         point = Point(
@@ -477,8 +460,6 @@ def main():
         )
         rtree.insert(point)
     
-    print("Đã tạo R-Tree thành công!")
-    
     # Hiển thị thông tin về cây
     counts = rtree.count_nodes()
     height = rtree.get_height()
@@ -487,30 +468,60 @@ def main():
     print(f"  - Số node lá: {counts['leaf']}")
     print(f"  - Số node nội bộ: {counts['internal']}")
     print(f"  - Tổng số entries trong các node lá: {counts['total_entries']}")
-    
-    # Tìm kiếm nếu có tham số
-    if args.lat is not None and args.lon is not None and args.radius is not None:
-        print(f"\nTìm kiếm trạm xăng trong bán kính {args.radius} km")
-        print(f"Tâm: ({args.lat}, {args.lon})")
-        
-        search_point = Point(args.lat, args.lon, {})
 
+    return rtree
+
+def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', type=str, help='JSON file')
+    parser.add_argument('--max-entries', type=int, default=5, help='Max entries per R-Tree node')
+    parser.add_argument('--lat', type=float)
+    parser.add_argument('--lon', type=float)
+    parser.add_argument('--radius', type=float, help='Radius in km for search')
+    
+    args = parser.parse_args()
+    
+    file = "db_fix.json"
+    max_entries = 5
+    lat = 21.040411
+    lat = 16.479059
+    lon = 105.750353
+    lon = 107.612245
+    radius = 10.0
+
+    if args.file is not None:
+        file = args.file
+
+    if args.max_entries is not None:
+        max_entries = args.max_entries
+
+    if args.lat is not None and args.lon is not None:
+        lat = args.lat
+        lon = args.lon
+
+    if args.radius is not None:
+        radius = args.radius
+
+
+    rtree = CreateRTreeFromFile(file, max_entries=max_entries)
+
+    print("="*80)
+    print(f"Find gas stations around ({lat}, {lon}) within radius {radius} km")
+
+    if lat is not None and lon is not None and radius is not None:        
+        search_point = Point(lat, lon, {})
         start = time.perf_counter()
-        results = rtree.search_square(search_point, args.radius)
+        results = rtree.search_square(search_point, radius)
         end = time.perf_counter()
 
-        print(f"Tìm kiếm hoàn tất trong {(end - start)*1000:.3f} ms.")
+        print(f"Found {len(results)} gas stations in {(end - start)*1000:.3f} ms.")
 
-        print(f"\nTìm thấy {len(results)} trạm xăng:")
-        print("-" * 80)
-        
         for i, (point, distance) in enumerate(results, 1):
             print(f"{i}. {point.data['name']} ({point.data['brand']})")
             print(f"   Địa chỉ: {point.data['display_name']}")
             print(f"   Khoảng cách: {distance:.2f} km")
-            print(f"   Tọa độ: ({point.lat}, {point.lon})")
-            print()
-
+            print(f"   Tọa độ: ({point.lat}, {point.lon}) \n")
 
 
 if __name__ == "__main__":

@@ -56,15 +56,17 @@ class MBR:
     
     def intersects_square(self, center_lat: float, center_lon: float, 
                           half_side_lat: float, half_side_lon: float) -> bool:
+        
+        EPSILON = 1
         square_min_lat = center_lat - half_side_lat
         square_max_lat = center_lat + half_side_lat
         square_min_lon = center_lon - half_side_lon
         square_max_lon = center_lon + half_side_lon
         
-        if self.max_lat < square_min_lat: return False
-        if self.min_lat > square_max_lat: return False
-        if self.max_lon < square_min_lon: return False
-        if self.min_lon > square_max_lon: return False
+        if self.max_lat < square_min_lat - EPSILON: return False
+        if self.min_lat > square_max_lat + EPSILON: return False
+        if self.max_lon < square_min_lon - EPSILON: return False
+        if self.min_lon > square_max_lon + EPSILON: return False
         return True
     
     def expand_to_include(self, point: Point) -> 'MBR':
